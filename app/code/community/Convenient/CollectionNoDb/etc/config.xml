@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Convenient_CollectionNoDb>
+            <version>0.1.0</version>
+        </Convenient_CollectionNoDb>
+    </modules>
+    <global>
+        <models>
+            <convenient_collectionnodb>
+                <class>Convenient_CollectionNoDb_Model</class>
+                <resourceModel>convenient_collectionnodb_resource</resourceModel>
+            </convenient_collectionnodb>
+            <convenient_collectionnodb_resource>
+                <class>Convenient_CollectionNoDb_Model_Resource</class>
+            </convenient_collectionnodb_resource>
+        </models>
+        <blocks>
+            <convenient_collectionnodb>
+                <class>Convenient_CollectionNoDb_Block</class>
+            </convenient_collectionnodb>
+        </blocks>
+        <helpers>
+            <convenient_collectionnodb>
+                <class>Convenient_CollectionNoDb_Helper</class>
+            </convenient_collectionnodb>
+        </helpers>
+    </global>
+</config>

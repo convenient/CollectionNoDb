@@ -1,0 +1,9 @@
+{
+    "name":"convenient/collection-no-db",
+    "description":"Non database collections for Magento that are filterable and sortable. Useful for custom admin panel grids.",
+    "type": "magento-module",
+    "license": "OSL-3.0",
+    "suggest":{
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}
