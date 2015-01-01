@@ -3,6 +3,7 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
 {
     protected $orderRenderer = null;
     protected $data = array();
+    protected $isLimitRendered = false;
 
     /**
      * @param Convenient_Data_Collection_Renderer_OrderRendererInterface $orderRenderer
@@ -45,8 +46,27 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
         return $this;
     }
 
+    /**
+     * @return $this|Varien_Data_Collection
+     *
+     * @author Luke Rodgers <lukerodgers90@gmail.com>
+     */
     protected function _renderLimit()
     {
+        if (!$this->isLimitRendered) {
+
+            if (!$pageSize = $this->getPageSize()) {
+                return $this;
+            }
+
+            $this->_totalRecords = count($this->data);
+
+            $offset = $pageSize * ($this->getCurPage() - 1);
+
+            $this->data = array_slice($this->data, $offset, $pageSize);
+
+            $this->isLimitRendered = true;
+        }
         return $this;
     }
 
@@ -123,13 +143,30 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
     public function getData()
     {
         if ($this->data === array()) {
+
+            $this->data = $this->fetchData();
+
             $this->_renderFilters()
                 ->_renderOrders()
                 ->_renderLimit();
-            $this->data = $this->fetchData();
+
             $this->_afterLoadData();
         }
         return $this->data;
+    }
+
+    /**
+     * @return int
+     *
+     * @author Luke Rodgers <lukerodgers90@gmail.com>
+     */
+    public function getSize()
+    {
+        if (is_null($this->_totalRecords)) {
+            $this->load();
+            $this->_totalRecords = count($this->getItems());
+        }
+        return intval($this->_totalRecords);
     }
 
     /**
@@ -147,12 +184,6 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
         }
 
         $this->_beforeLoad();
-
-        $this->getData();
-
-        $this->_renderFilters()
-            ->_renderOrders()
-            ->_renderLimit();
 
         $data = $this->getData();
         $this->resetData();
