@@ -17,6 +17,9 @@ class Convenient_Data_Collection_Renderer_Order implements Convenient_Data_Colle
                 $collection,
                 function (Varien_Object $data1, Varien_Object $data2) use ($sortField, $direction, $sortOrderDesc) {
                     $directionMultiplier = !strcasecmp($direction, $sortOrderDesc) ? -1 : 1;
+                    if (is_numeric($data1[$sortField]) && is_numeric($data2[$sortField])) {
+                        return ($directionMultiplier * ($data1[$sortField] - $data2[$sortField]));
+                    }
                     return ($directionMultiplier * strcasecmp($data1[$sortField], $data2[$sortField]));
                 }
             );
