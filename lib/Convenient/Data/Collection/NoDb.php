@@ -1,6 +1,31 @@
 <?php
 class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
 {
+    protected $orderRenderer = null;
+
+    /**
+     * @param Convenient_Data_Collection_Renderer_OrderRendererInterface $orderRenderer
+     *
+     * @author Luke Rodgers <lukerodgers90@gmail.com>
+     */
+    public function setOrderRenderer(Convenient_Data_Collection_Renderer_OrderRendererInterface $orderRenderer)
+    {
+        $this->orderRenderer = $orderRenderer;
+    }
+
+    /**
+     * @return Convenient_Data_Collection_Renderer_Order|Convenient_Data_Collection_Renderer_OrderRendererInterface
+     *
+     * @author Luke Rodgers <lukerodgers90@gmail.com>
+     */
+    public function getOrderRenderer()
+    {
+        if (is_null($this->orderRenderer)) {
+            $this->orderRenderer = new Convenient_Data_Collection_Renderer_Order;
+        }
+        return $this->orderRenderer;
+    }
+
     /**
      * @param array $collection
      * @return mixed
@@ -9,18 +34,6 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
      */
     public function renderOrders($collection)
     {
-        $sortOrderDesc = self::SORT_ORDER_DESC;
-
-        foreach (array_reverse($this->_orders, true) as $sortField => $direction) {
-            usort(
-                $collection,
-                function (Varien_Object $data1, Varien_Object $data2) use ($sortField, $direction, $sortOrderDesc) {
-                    $directionMultiplier = !strcasecmp($direction, $sortOrderDesc) ? -1 : 1;
-                    return ($directionMultiplier * strcasecmp($data1[$sortField], $data2[$sortField]));
-                }
-            );
-        }
-
-        return $collection;
+        return $this->getOrderRenderer()->render($collection, $this->_orders);
     }
 }

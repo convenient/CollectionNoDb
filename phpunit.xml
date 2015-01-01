@@ -1,0 +1,8 @@
+<phpunit bootstrap="tests/convenient-bootstrap/no-db.php" syntaxCheck="true">
+    <testsuites>
+        <testsuite name="Convenient Collection NoDb Test Suite">
+            <directory>tests/app</directory>
+            <directory>tests/lib</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
