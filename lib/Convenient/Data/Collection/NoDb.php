@@ -2,6 +2,7 @@
 class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
 {
     protected $orderRenderer = null;
+    protected $filterRenderer = null;
     protected $data = array();
     protected $isLimitRendered = false;
 
@@ -28,6 +29,38 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
         return $this->orderRenderer;
     }
 
+    public function setFilterRenderer($filterRenderer)
+    {
+        $this->filterRenderer = $filterRenderer;
+    }
+
+    /**
+     * @return Convenient_Data_Collection_Renderer_Filter
+     *
+     * @author Luke Rodgers <lukerodgers90@gmail.com>
+     */
+    public function getFilterRenderer()
+    {
+        if (is_null($this->filterRenderer)) {
+            $this->filterRenderer = new Convenient_Data_Collection_Renderer_Filter;
+        }
+        return $this->filterRenderer;
+    }
+
+    /**
+     * @param $field
+     * @param null $condition
+     * @return $this
+     *
+     * @author Luke Rodgers <lukerodgers90@gmail.com>
+     */
+    public function addFieldToFilter($field, $condition = null)
+    {
+        $this->addFilter($field, $condition);
+        return $this;
+    }
+
+
     /**
      * @return array
      *
@@ -41,9 +74,77 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
     protected function _renderFilters()
     {
         if (!$this->_isFiltersRendered) {
+
+            //$this->data = $this->getFilterRenderer()->render($this->data, $this->getFilter());
+            $filtersMap = array();
+
+            if (!empty($this->data)) {
+                $firstItem = reset($this->data);
+                if ($firstItem) {
+                    foreach ($firstItem->getData() as $field => $value) {
+                        $filter = $this->getFilter(array($field));
+                        if (!empty($filter)) {
+                            $filtersMap[$field] = $filter;
+                        }
+                    }
+                }
+            }
+
+            if (!empty($filtersMap)) {
+                $this->data = array_filter($this->data, $this->filterData($filtersMap));
+            }
+
             $this->_isFiltersRendered = true;
         }
         return $this;
+    }
+
+    protected function filterData($filtersMap)
+    {
+        $filterRenderer = $this->getFilterRenderer();
+        $filterAbleFields = array_keys($filtersMap);
+
+        return function ($row) use ($filtersMap, $filterAbleFields) {
+
+            //For every field in the row, if a filter exists and the field doesnt pass the filter, return false
+            foreach ($filterAbleFields as $field) {
+
+                $value = $row->getData($field);
+
+                foreach ($filtersMap[$field] as $filterContainer) {
+                    foreach ($filterContainer->getData('value') as $filterType => $filterCondition) {
+                        switch ($filterType) {
+                            case 'like':
+                                //remove '% and &' from each side
+                                if (stripos($value, substr($filterCondition, 2, -2)) === false) {
+                                    return false;
+                                }
+                                break;
+                            case 'from':
+                                if ($value < $filterCondition) {
+                                    return false;
+                                }
+                                break;
+                            case 'to':
+                                if ($value > $filterCondition) {
+                                    return false;
+                                }
+                                break;
+                            default:
+                                Mage::throwException('Unsupported filter used');
+                        }
+                    }
+                }
+
+
+                /*if (!$collection->checkFieldMatchesFilters($row[$field], $filters[$field])) {
+                    return false;
+                }*/
+            }
+
+            //no filters failed, this must be a filter matching row.
+            return true;
+        };
     }
 
     /**
@@ -198,5 +299,4 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
         $this->_afterLoad();
         return $this;
     }
-
 }
