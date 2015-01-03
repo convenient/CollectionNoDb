@@ -106,43 +106,65 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
 
         return function ($row) use ($filtersMap, $filterAbleFields) {
 
-            //For every field in the row, if a filter exists and the field doesnt pass the filter, return false
             foreach ($filterAbleFields as $field) {
 
                 $value = $row->getData($field);
 
                 foreach ($filtersMap[$field] as $filterContainer) {
-                    foreach ($filterContainer->getData('value') as $filterType => $filterCondition) {
-                        switch ($filterType) {
-                            case 'like':
-                                //remove '% and &' from each side
-                                if (stripos($value, substr($filterCondition, 2, -2)) === false) {
-                                    return false;
-                                }
-                                break;
-                            case 'from':
-                                if ($value < $filterCondition) {
-                                    return false;
-                                }
-                                break;
-                            case 'to':
-                                if ($value > $filterCondition) {
-                                    return false;
-                                }
-                                break;
-                            default:
-                                Mage::throwException('Unsupported filter used');
+
+                    $filterData = $filterContainer->getData('value');
+
+                    if (isset($filterData['date'])) {
+
+                        $rowDate = strtotime($value);
+                        if (!$rowDate) {
+                            return false;
                         }
+
+                        if (isset($filterData['from'])) {
+                            /** @var Zend_Date $from */
+                            $from = $filterData['from'];
+
+                            if ($rowDate < $from->getTimestamp()) {
+                                return false;
+                            }
+                        }
+
+                        if (isset($filterData['to'])) {
+                            /** @var Zend_Date $to */
+                            $to = $filterData['to'];
+
+                            if ($rowDate > $to->getTimestamp()) {
+                                return false;
+                            }
+                        }
+
+                    } elseif (isset($filterData['from']) || isset($filterData['to'])) {
+
+                        if (isset($filterData['from'])) {
+                            $from = $filterData['from'];
+                            if ($value < $from) {
+                                return false;
+                            }
+                        }
+
+                        if (isset($filterData['to'])) {
+                            $to = $filterData['to'];
+                            if ($value > $to) {
+                                return false;
+                            }
+                        }
+
+                    } elseif (isset($filterData['like'])) {
+                        if (stripos($value, substr($filterData['like'], 2, -2)) === false) {
+                            return false;
+                        }
+                    } else {
+                        Mage::throwException("Unsupported filter used");
                     }
                 }
-
-
-                /*if (!$collection->checkFieldMatchesFilters($row[$field], $filters[$field])) {
-                    return false;
-                }*/
             }
 
-            //no filters failed, this must be a filter matching row.
             return true;
         };
     }
