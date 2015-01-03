@@ -1,50 +1,55 @@
 <?php
 class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
 {
-    protected $orderRenderer = null;
-    protected $filterRenderer = null;
+    protected $orderer = null;
+    protected $filterer = null;
     protected $data = array();
     protected $isLimitRendered = false;
 
     /**
-     * @param Convenient_Data_Collection_Renderer_OrderRendererInterface $orderRenderer
+     * @param $orderer
      *
      * @author Luke Rodgers <lukerodgers90@gmail.com>
      */
-    public function setOrderRenderer(Convenient_Data_Collection_Renderer_OrderRendererInterface $orderRenderer)
+    public function setOrderer($orderer)
     {
-        $this->orderRenderer = $orderRenderer;
+        $this->orderer = $orderer;
     }
 
     /**
-     * @return Convenient_Data_Collection_Renderer_Order|Convenient_Data_Collection_Renderer_OrderRendererInterface
+     * @return Convenient_Data_Collection_NoDb_Orderer
      *
      * @author Luke Rodgers <lukerodgers90@gmail.com>
      */
-    public function getOrderRenderer()
+    public function getOrderer()
     {
-        if (is_null($this->orderRenderer)) {
-            $this->orderRenderer = new Convenient_Data_Collection_Renderer_Order;
+        if (is_null($this->orderer)) {
+            $this->orderer = new Convenient_Data_Collection_NoDb_Orderer;
         }
-        return $this->orderRenderer;
-    }
-
-    public function setFilterRenderer($filterRenderer)
-    {
-        $this->filterRenderer = $filterRenderer;
+        return $this->orderer;
     }
 
     /**
-     * @return Convenient_Data_Collection_Renderer_Filter
+     * @param $filterer
      *
      * @author Luke Rodgers <lukerodgers90@gmail.com>
      */
-    public function getFilterRenderer()
+    public function setFilterer($filterer)
     {
-        if (is_null($this->filterRenderer)) {
-            $this->filterRenderer = new Convenient_Data_Collection_Renderer_Filter;
+        $this->filterer = $filterer;
+    }
+
+    /**
+     * @return Convenient_Data_Collection_NoDb_Filterer
+     *
+     * @author Luke Rodgers <lukerodgers90@gmail.com>
+     */
+    public function getFilterer()
+    {
+        if (is_null($this->filterer)) {
+            $this->filterer = new Convenient_Data_Collection_NoDb_Filterer;
         }
-        return $this->filterRenderer;
+        return $this->filterer;
     }
 
     /**
@@ -60,7 +65,6 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
         return $this;
     }
 
-
     /**
      * @return array
      *
@@ -71,12 +75,27 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
         return array();
     }
 
+    /**
+     * @return $this|Varien_Data_Collection
+     *
+     * @author Luke Rodgers <lukerodgers90@gmail.com>
+     */
+    protected function _renderOrders()
+    {
+        $this->data = $this->getOrderer()->order($this->data, $this->_orders);
+        return $this;
+    }
+
+    /**
+     * @return $this|Varien_Data_Collection
+     *
+     * @author Luke Rodgers <lukerodgers90@gmail.com>
+     */
     protected function _renderFilters()
     {
         if (!$this->_isFiltersRendered) {
 
-            //$this->data = $this->getFilterRenderer()->render($this->data, $this->getFilter());
-            $filtersMap = array();
+            $filters = array();
 
             if (!empty($this->data)) {
                 $firstItem = reset($this->data);
@@ -84,124 +103,19 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
                     foreach ($firstItem->getData() as $field => $value) {
                         $filter = $this->getFilter(array($field));
                         if (!empty($filter)) {
-                            $filtersMap[$field] = $filter;
+                            $filters[$field] = $filter;
                         }
                     }
                 }
             }
 
-            if (!empty($filtersMap)) {
-                $this->data = array_filter($this->data, $this->filterData($filtersMap));
+            if (!empty($filters)) {
+                $this->data = $this->getFilterer()->filter($this->data, $filters);
             }
 
             $this->_isFiltersRendered = true;
         }
         return $this;
-    }
-
-    protected function filterData($filtersMap)
-    {
-        $filterRenderer = $this->getFilterRenderer();
-        $filterAbleFields = array_keys($filtersMap);
-
-        return function ($row) use ($filtersMap, $filterAbleFields) {
-
-            foreach ($filterAbleFields as $field) {
-
-                $value = $row->getData($field);
-
-                foreach ($filtersMap[$field] as $filterContainer) {
-
-                    $filterData = $filterContainer->getData('value');
-
-                    if (isset($filterData['eq'])) {
-                        if ($filterData['eq'] != $value) {
-                            return false;
-                        }
-                    } elseif (isset($filterData['date'])) {
-
-                        $rowDate = strtotime($value);
-                        if (!$rowDate) {
-                            return false;
-                        }
-
-                        if (isset($filterData['from'])) {
-                            /** @var Zend_Date $from */
-                            $from = $filterData['from'];
-
-                            if ($rowDate < $from->getTimestamp()) {
-                                return false;
-                            }
-                        }
-
-                        if (isset($filterData['to'])) {
-                            /** @var Zend_Date $to */
-                            $to = $filterData['to'];
-
-                            if ($rowDate > $to->getTimestamp()) {
-                                return false;
-                            }
-                        }
-
-                    } elseif (isset($filterData['datetime'])) {
-                        $rowDate = strtotime($value);
-                        if (!$rowDate) {
-                            return false;
-                        }
-
-                        if (isset($filterData['from'])) {
-                            $from = $filterData['from'];
-
-                            $dateTimestamp = date("Y-m-d", $from->getTimestamp());
-                            $hoursTimeStamp = date("H:i:s", strtotime($filterData['orig_from']));
-                            $fullDateTime = strtotime($dateTimestamp . ' ' . $hoursTimeStamp);
-
-                            if ($rowDate < $fullDateTime) {
-                                return false;
-                            }
-
-                        }
-
-                        if (isset($filterData['to'])) {
-                            $to = $filterData['to'];
-
-                            $dateTimestamp = date("Y-m-d", $to->getTimestamp());
-                            $hoursTimeStamp = date("H:i:s", strtotime($filterData['orig_to']));
-                            $fullDateTime = strtotime($dateTimestamp . ' ' . $hoursTimeStamp);
-
-                            if ($rowDate > $fullDateTime) {
-                                return false;
-                            }
-                        }
-
-                    } elseif (isset($filterData['from']) || isset($filterData['to'])) {
-
-                        if (isset($filterData['from'])) {
-                            $from = $filterData['from'];
-                            if ($value < $from) {
-                                return false;
-                            }
-                        }
-
-                        if (isset($filterData['to'])) {
-                            $to = $filterData['to'];
-                            if ($value > $to) {
-                                return false;
-                            }
-                        }
-
-                    } elseif (isset($filterData['like'])) {
-                        if (stripos($value, substr($filterData['like'], 2, -2)) === false) {
-                            return false;
-                        }
-                    } else {
-                        Mage::throwException("Unsupported filter used");
-                    }
-                }
-            }
-
-            return true;
-        };
     }
 
     /**
@@ -218,24 +132,11 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
             }
 
             $this->_totalRecords = count($this->data);
-
             $offset = $pageSize * ($this->getCurPage() - 1);
-
             $this->data = array_slice($this->data, $offset, $pageSize);
 
             $this->isLimitRendered = true;
         }
-        return $this;
-    }
-
-    /**
-     * @return $this|Varien_Data_Collection
-     *
-     * @author Luke Rodgers <lukerodgers90@gmail.com>
-     */
-    protected function _renderOrders()
-    {
-        $this->data = $this->getOrderRenderer()->render($this->data, $this->_orders);
         return $this;
     }
 
