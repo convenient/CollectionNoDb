@@ -139,6 +139,37 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
                             }
                         }
 
+                    } elseif (isset($filterData['datetime'])) {
+                        $rowDate = strtotime($value);
+                        if (!$rowDate) {
+                            return false;
+                        }
+
+                        if (isset($filterData['from'])) {
+                            $from = $filterData['from'];
+
+                            $dateTimestamp = date("Y-m-d", $from->getTimestamp());
+                            $hoursTimeStamp = date("H:i:s", strtotime($filterData['orig_from']));
+                            $fullDateTime = strtotime($dateTimestamp . ' ' . $hoursTimeStamp);
+
+                            if ($rowDate < $fullDateTime) {
+                                return false;
+                            }
+
+                        }
+
+                        if (isset($filterData['to'])) {
+                            $to = $filterData['to'];
+
+                            $dateTimestamp = date("Y-m-d", $to->getTimestamp());
+                            $hoursTimeStamp = date("H:i:s", strtotime($filterData['orig_to']));
+                            $fullDateTime = strtotime($dateTimestamp . ' ' . $hoursTimeStamp);
+
+                            if ($rowDate > $fullDateTime) {
+                                return false;
+                            }
+                        }
+
                     } elseif (isset($filterData['from']) || isset($filterData['to'])) {
 
                         if (isset($filterData['from'])) {
