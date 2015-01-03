@@ -10,7 +10,7 @@ class Convenient_Data_Collection_NoDb_Filterer
      */
     public function filter(array $collection, array $filters)
     {
-        return array_filter($collection, $this->filterCallback($filters));
+        return array_values(array_filter($collection, $this->filterCallback($filters)));
     }
 
     /**
