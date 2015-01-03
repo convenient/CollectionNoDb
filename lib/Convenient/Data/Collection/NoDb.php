@@ -114,7 +114,11 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
 
                     $filterData = $filterContainer->getData('value');
 
-                    if (isset($filterData['date'])) {
+                    if (isset($filterData['eq'])) {
+                        if ($filterData['eq'] != $value) {
+                            return false;
+                        }
+                    } elseif (isset($filterData['date'])) {
 
                         $rowDate = strtotime($value);
                         if (!$rowDate) {
