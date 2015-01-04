@@ -14,6 +14,29 @@ class Convenient_Data_Collection_NoDb_FiltererTest extends PHPUnit_Framework_Tes
     }
 
     /**
+     * @test
+     * @author Luke Rodgers <lukerodgers90@gmail.com>
+     */
+    public function unsupportedFilterException()
+    {
+        $this->setExpectedException('Mage_Core_Exception', 'Unsupported filter used');
+
+        $filters = array(
+            'field' => array(
+                new Varien_Object(
+                    array(
+                        'value' => array(
+                            'some_unknown_filter'
+                        )
+                    )
+                )
+            )
+        );
+
+        $this->filterer->filter(array(new Varien_Object(array('field' => 'val'))), $filters);
+    }
+
+    /**
      * @param $collection
      * @param $filters
      * @param $expected
