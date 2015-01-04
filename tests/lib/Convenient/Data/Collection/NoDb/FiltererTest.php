@@ -19,6 +19,75 @@ class Convenient_Data_Collection_NoDb_FiltererTest extends PHPUnit_Framework_Tes
      * @param $expected
      *
      * @test
+     * @dataProvider dateProvider
+     *
+     * @author Luke Rodgers <lukerodgers90@gmail.com>
+     */
+    public function date($collection, $filters, $expected)
+    {
+        $this->assertEquals($expected, $this->filterer->filter($collection, $filters));
+    }
+
+    /**
+     * @return array
+     *
+     * @author Luke Rodgers <lukerodgers90@gmail.com>
+     */
+    public function dateProvider()
+    {
+        $rowA = new Varien_Object(
+            array(
+                'field' => '2015-01-06'
+            )
+        );
+
+        $rowB = new Varien_Object(
+            array(
+                'field' => '2015-01-08'
+            )
+        );
+
+        $rowC = new Varien_Object(
+            array(
+                'field' => '2015-01-10'
+            )
+        );
+
+        $rowD = new Varien_Object();
+
+        $timestamp1 = new Zend_Date();
+        $timestamp1->setTimestamp(strtotime('2015-01-07'));
+
+        $timestamp2 = new Zend_Date();
+        $timestamp2->setTimestamp(strtotime('2015-01-09'));
+
+        return array(
+            array(
+                array($rowA, $rowB, $rowC, $rowD),
+                array(
+                    'field' => array(
+                        new Varien_Object(
+                            array(
+                                'value' => array(
+                                    'date' => true,
+                                    'from' => $timestamp1,
+                                    'to' => $timestamp2
+                                )
+                            )
+                        )
+                    )
+                ),
+                array($rowB)
+            ),
+        );
+    }
+
+    /**
+     * @param $collection
+     * @param $filters
+     * @param $expected
+     *
+     * @test
      * @dataProvider fromToProvider
      *
      * @author Luke Rodgers <lukerodgers90@gmail.com>
