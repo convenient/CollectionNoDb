@@ -1,0 +1,16 @@
+<phpunit bootstrap="tests/convenient-bootstrap/no-db.php" syntaxCheck="true">
+    <testsuites>
+        <testsuite name="Convenient Collection NoDb Test Suite">
+            <directory>tests/app</directory>
+            <directory>tests/lib</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist addUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">lib/Convenient</directory>
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="coverage-html" target="../coverage/convenient/collection-nodb" title="MLI" charset="UTF-8" yui="true" highlight="true" lowUpperBound="35" highLowerBound="70"/>
+    </logging>
+</phpunit>
