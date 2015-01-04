@@ -19,6 +19,77 @@ class Convenient_Data_Collection_NoDb_FiltererTest extends PHPUnit_Framework_Tes
      * @param $expected
      *
      * @test
+     * @dataProvider dateTimeProvider
+     *
+     * @author Luke Rodgers <lukerodgers90@gmail.com>
+     */
+    public function dateTime($collection, $filters, $expected)
+    {
+        $this->assertEquals($expected, $this->filterer->filter($collection, $filters));
+    }
+
+    /**
+     * @return array
+     *
+     * @author Luke Rodgers <lukerodgers90@gmail.com>
+     */
+    public function dateTimeProvider()
+    {
+        $rowA = new Varien_Object(
+            array(
+                'field' => '2015-01-06 06:00:00'
+            )
+        );
+
+        $rowB = new Varien_Object(
+            array(
+                'field' => '2015-01-08 10:59:00'
+            )
+        );
+
+        $rowC = new Varien_Object(
+            array(
+                'field' => '2015-01-08 11:00:00'
+            )
+        );
+
+        $rowD = new Varien_Object();
+
+        $timestamp1 = new Zend_Date();
+        $timestamp1->setTimestamp(strtotime('2015-01-08 00:00:00'));
+
+        $timestamp2 = new Zend_Date();
+        $timestamp2->setTimestamp(strtotime('2015-01-08 00:00:00'));
+
+        return array(
+            array(
+                array($rowA, $rowB, $rowC, $rowD),
+                array(
+                    'field' => array(
+                        new Varien_Object(
+                            array(
+                                'value' => array(
+                                    'datetime' => true,
+                                    'orig_from' => '01/08/2015 10:00:00',
+                                    'orig_to' => '01/08/2015 10:59:59',
+                                    'from' => $timestamp1,
+                                    'to' => $timestamp2
+                                )
+                            )
+                        )
+                    )
+                ),
+                array($rowB)
+            ),
+        );
+    }
+
+    /**
+     * @param $collection
+     * @param $filters
+     * @param $expected
+     *
+     * @test
      * @dataProvider dateProvider
      *
      * @author Luke Rodgers <lukerodgers90@gmail.com>
