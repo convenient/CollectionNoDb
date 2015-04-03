@@ -3,43 +3,33 @@ CollectionNoDb
 
 A collection for Magento 1.x admin panel that you can use without a database
 
-```
-<?php
+## Example
+You can turn this
 
-class Namespace_Module_Model_Resource_Collection_DiskAccess extends Convenient_Data_Collection_NoDb
-{
-    /**
-     * Create a filterable admin panel grid by reading in data.csv
-     *
-     * @return $this|array
-     *
-     * @author Luke Rodgers <lukerodgers90@gmail.com>
-     */
-    protected function fetchData()
-    {
-        $data = array();
+![csv data](https://github.com/adam-p/markdown-here/raw/master/sample/csv.png "CSV Data")
 
-        $handle = fopen('data.csv', 'r');
-        if (!$handle) {
-            die("Failed to open file");
-        }
+Into this
 
-        $headersData = fgetcsv($handle);
-        if ($headersData == false) {
-            die("Failed to load file headers");
-        }
+![admin panel grid filtering the csv data](https://github.com/adam-p/markdown-here/raw/master/sample/csv-grid.png "Admin panel grid filtering the csv data")
 
-        while (($line = fgetcsv($handle)) !== false) {
-            $temp = array_combine($headersData, $line);
+## Configuration
 
-            $item = $this->getNewEmptyItem();
-            $item->addData($temp);
-            $data[] = $item;
-        }
+The configuration of the grid is fairly typical, the only real condition is that there are only a few filter types supported
 
-        fclose($handle);
+* Options (select dropdown)
+* Date
+* Datetime
+* Text
+* Number (From and To)
 
-        return $data;
-    }
-}
-```
+View the following file to see an example grid declaration
+
+[Convenient_AdminGrid_Block_Adminhtml_Disk_Grid](https://github.com/adam-p/markdown-here/raw/master/sample/app/code/local/Convenient/AdminGrid/Block/Adminhtml/Disk/Grid.php)
+
+### Defining the Data Source
+
+In this example we're reading the data in from a csv, you could use anything you feel like. Just extend the library class and define the `fetchData` source. 
+
+In the following example you can see that I've used object caching as well as the cache storage in order to ease the insanity of disk access.
+
+[Convenient_AdminGrid_Model_Resource_Collection_Disk](https://github.com/adam-p/markdown-here/raw/master/sample/app/code/local/Convenient/AdminGrid/Model/Resource/Collection/Disk.php)
