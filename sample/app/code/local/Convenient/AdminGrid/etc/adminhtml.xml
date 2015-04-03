@@ -7,7 +7,7 @@
             <children>
                 <grid>
                     <title>Grid</title>
-                    <action>convenient-grid/disk</action>
+                    <action>*/adminGridDisk</action>
                 </grid>
             </children>
         </convenient>

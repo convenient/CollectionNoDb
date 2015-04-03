@@ -1,6 +1,6 @@
 <?php
 
-class Convenient_AdminGrid_DiskController extends Mage_Adminhtml_Controller_Action
+class Convenient_AdminGrid_AdminGridDiskController extends Mage_Adminhtml_Controller_Action
 {
     /**
      *

@@ -31,13 +31,13 @@
     </global>
     <admin>
         <routers>
-            <convenient_grid>
-                <use>admin</use>
+            <adminhtml>
                 <args>
-                    <frontName>convenient-grid</frontName>
-                    <module>Convenient_AdminGrid</module>
+                    <modules>
+                        <Convenient_AdminGrid before="Mage_Adminhtml">Convenient_AdminGrid</Convenient_AdminGrid>
+                    </modules>
                 </args>
-            </convenient_grid>
+            </adminhtml>
         </routers>
     </admin>
 </config>
