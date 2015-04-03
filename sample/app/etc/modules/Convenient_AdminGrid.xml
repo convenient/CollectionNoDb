@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Convenient_AdminGrid>
+            <active>true</active>
+            <codePool>local</codePool>
+        </Convenient_AdminGrid>
+    </modules>
+</config>
