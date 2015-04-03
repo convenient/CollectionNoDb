@@ -94,7 +94,6 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
     protected function _renderFilters()
     {
         if (!$this->_isFiltersRendered) {
-
             $filters = array();
 
             if (!empty($this->data)) {
@@ -126,7 +125,6 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
     protected function _renderLimit()
     {
         if (!$this->isLimitRendered) {
-
             if (!$pageSize = $this->getPageSize()) {
                 return $this;
             }
@@ -150,7 +148,6 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
     public function loadData($printQuery = false, $logQuery = false)
     {
         return $this->load($printQuery, $logQuery);
-
     }
 
     /**
@@ -202,7 +199,6 @@ class Convenient_Data_Collection_NoDb extends Varien_Data_Collection
     public function getData()
     {
         if ($this->data === array()) {
-
             $this->data = $this->fetchData();
 
             $this->_renderFilters()

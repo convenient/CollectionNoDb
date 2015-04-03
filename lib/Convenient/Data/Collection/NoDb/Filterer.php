@@ -27,12 +27,10 @@ class Convenient_Data_Collection_NoDb_Filterer
 
             /** @var Varien_Object $row */
             foreach ($filterAbleFields as $field) {
-
                 $value = $row->getData($field);
 
                 /** @var Varien_Object $filterContainer */
                 foreach ($filtersMap[$field] as $filterContainer) {
-
                     $filter = $filterContainer->getData('value');
 
                     if (isset($filter['eq'])) {
@@ -40,7 +38,6 @@ class Convenient_Data_Collection_NoDb_Filterer
                             return false;
                         }
                     } elseif (isset($filter['date'])) {
-
                         $rowDate = strtotime($value);
                         if (!$rowDate) {
                             return false;
@@ -96,7 +93,6 @@ class Convenient_Data_Collection_NoDb_Filterer
                         }
 
                     } elseif (isset($filter['from']) || isset($filter['to'])) {
-
                         if (isset($filter['from'])) {
                             $from = $filter['from'];
                             if ($value < $from) {
